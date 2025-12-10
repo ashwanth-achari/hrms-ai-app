@@ -1,10 +1,13 @@
-# app.py
+# hrms-ai/hrms_ai/main.py
 from typing import List, Optional
+import os
+
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-import os
 from pydantic import BaseModel
+
 from .extractor import extract_resume_fields
+
 
 class EducationItem(BaseModel):
     line: str
@@ -19,41 +22,60 @@ class ResumeResponse(BaseModel):
     education: List[EducationItem]
     raw_text: str
 
+
+# Path to PDF resumes inside the repo
 ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets", "resumes")
 
 app = FastAPI(
-    title="Resume Parser API",
-    description="PDF resume ingestion and structured data extraction",
+    title="HRMS AI – Resume Parser API",
+    description="PDF resume ingestion and structured data extraction for HRMS.",
     version="1.0.0",
 )
 
-# Enable CORS for local/frontend testing
+# CORS – backend will call this, but keeping * is fine for testing
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # tighten for production
+    allow_origins=["*"],  # you can tighten this later to only allow backend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
+@app.get("/health")
+def health_check():
+    """Simple health endpoint for Render + debugging."""
+    return {"status": "ok", "service": "hrms-ai"}
+
+
 @app.get("/ocr/extract", response_model=ResumeResponse)
-def parse_resume(filename: str = Query(..., description="Name of the resume PDF (e.g., candidate.pdf)")):
-    print("Resume parsed:", ASSET_DIR, filename)
+def parse_resume(
+    filename: str = Query(..., description="Name of the resume PDF (e.g., candidate.pdf)")
+):
+    """
+    Load a PDF from assets/resumes/<filename>,
+    run extraction pipeline, and return structured data.
+    """
+    print("🔍 HRMS-AI: parsing resume:", filename)
     file_path = os.path.join(ASSET_DIR, filename)
-    print("Resume parsed:", file_path)
+    print("📄 Resolved path:", file_path)
 
     if not filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Filename must end with .pdf")
 
     if not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail="Resume file not found in assets/resumes folder")
+        raise HTTPException(
+            status_code=404,
+            detail="Resume file not found in assets/resumes folder",
+        )
 
     try:
         with open(file_path, "rb") as f:
             file_bytes = f.read()
+
         data = extract_resume_fields(file_bytes)
     except Exception as e:
+        print("❌ Error in extract_resume_fields:", e)
         raise HTTPException(status_code=500, detail=f"Parsing failed: {str(e)}")
 
     return data
