@@ -67,15 +67,12 @@ const RecruitmentAI = () => {
 
     try {
       const filename = encodeURIComponent(selectedCandidate.resumeFilename);
-
+      const AI_URL = import.meta.env.VITE_AI_URL;
+      
       // matches what you tested in the browser:
-      // 127.0.0.1:8000/ocr/extract?filename=john_doe.pdf
-      const res = await fetch(
-        `http://127.0.0.1:8000/ocr/extract?filename=${filename}`,
-        {
-          method: "GET",
-        }
-      );
+      const res = await fetch(`${AI_URL}/ocr/extract?filename=${filename}`, {
+        method: "GET",
+      });
 
       if (!res.ok) {
         let msg = `OCR API error (${res.status})`;
@@ -128,7 +125,9 @@ const RecruitmentAI = () => {
               <th style={{ textAlign: "left", padding: "0.5rem" }}>ID</th>
               <th style={{ textAlign: "left", padding: "0.5rem" }}>Name</th>
               <th style={{ textAlign: "left", padding: "0.5rem" }}>Role</th>
-              <th style={{ textAlign: "left", padding: "0.5rem" }}>Exp (yrs)</th>
+              <th style={{ textAlign: "left", padding: "0.5rem" }}>
+                Exp (yrs)
+              </th>
               <th style={{ textAlign: "left", padding: "0.5rem" }}>Status</th>
             </tr>
           </thead>
@@ -352,8 +351,8 @@ const RecruitmentAI = () => {
           color: "#9ca3af",
         }}
       >
-        Voice interaction: hook this input to WebRTC / browser audio + STT → your
-        AI backend.
+        Voice interaction: hook this input to WebRTC / browser audio + STT →
+        your AI backend.
       </div>
     </div>
   );

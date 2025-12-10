@@ -35,11 +35,15 @@ app = FastAPI(
 # CORS – backend will call this, but keeping * is fine for testing
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # you can tighten this later to only allow backend URL
+    allow_origins=[
+        "http://localhost:5173",
+        "https://hrms-ai-app.vercel.app"    
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 
 @app.get("/health")
