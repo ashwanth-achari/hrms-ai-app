@@ -1,9 +1,10 @@
+// src/pages/LoginPage.jsx
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
-  const { login, error: authError } = useAuth();
+  const { login, error: authError, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -15,17 +16,24 @@ const LoginPage = () => {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
+
     try {
-      // ✅ This calls the backend login via AuthContext
       await login(email, password);
+
+      // 🔁 Optionally, you can route based on role:
+      // if (user.role === "MANAGEMENT_ADMIN") navigate("/admin");
+      // else if (user.role === "SENIOR_MANAGER") navigate("/manager");
+      // else ...
       navigate("/dashboard");
     } catch (err) {
-      console.error("Login error:", err);
+      console.error("❌ Login error (LoginPage):", err);
       setError(err.message || "Login failed");
     } finally {
       setSubmitting(false);
     }
   };
+
+  const isBusy = submitting || authLoading;
 
   return (
     <div
@@ -66,16 +74,29 @@ const LoginPage = () => {
             H
           </div>
           <h1 style={{ fontSize: "1.25rem", fontWeight: 700 }}>HRMS Login</h1>
-          <p style={{ fontSize: "0.85rem", color: "#6b7280", marginTop: "0.25rem" }}>
+          <p
+            style={{
+              fontSize: "0.85rem",
+              color: "#6b7280",
+              marginTop: "0.25rem",
+            }}
+          >
             Sign in with your corporate credentials
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+        <form
+          onSubmit={handleSubmit}
+          style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+        >
           <div>
             <label
               htmlFor="email"
-              style={{ display: "block", fontSize: "0.85rem", marginBottom: "0.25rem" }}
+              style={{
+                display: "block",
+                fontSize: "0.85rem",
+                marginBottom: "0.25rem",
+              }}
             >
               Email
             </label>
@@ -95,10 +116,15 @@ const LoginPage = () => {
               placeholder="admin@company.com"
             />
           </div>
+
           <div>
             <label
               htmlFor="password"
-              style={{ display: "block", fontSize: "0.85rem", marginBottom: "0.25rem" }}
+              style={{
+                display: "block",
+                fontSize: "0.85rem",
+                marginBottom: "0.25rem",
+              }}
             >
               Password
             </label>
@@ -135,26 +161,43 @@ const LoginPage = () => {
 
           <button
             type="submit"
-            disabled={submitting}
+            disabled={isBusy}
             style={{
               marginTop: "0.5rem",
               width: "100%",
               padding: "0.65rem 0.75rem",
               borderRadius: "999px",
               border: "none",
-              background: submitting ? "#93c5fd" : "#1d4ed8",
+              background: isBusy ? "#93c5fd" : "#1d4ed8",
               color: "#ffffff",
               fontWeight: 600,
-              cursor: submitting ? "not-allowed" : "pointer",
+              cursor: isBusy ? "not-allowed" : "pointer",
               fontSize: "0.95rem",
             }}
           >
-            {submitting ? "Signing in..." : "Sign In"}
+            {isBusy ? "Signing in..." : "Sign In"}
           </button>
         </form>
 
-        {/* Test Credentials Info */}
-       
+        {/* Optional: show test credentials */}
+        <div
+          style={{
+            marginTop: "1.25rem",
+            padding: "0.75rem",
+            borderRadius: "0.75rem",
+            background: "#eff6ff",
+            fontSize: "0.75rem",
+            color: "#1f2937",
+          }}
+        >
+          <div style={{ fontWeight: 600, marginBottom: "0.25rem" }}>
+            Test credentials:
+          </div>
+          <div>admin@company.com / password123</div>
+          <div>manager@company.com / password123</div>
+          <div>recruiter@company.com / password123</div>
+          <div>employee@company.com / password123</div>
+        </div>
       </div>
     </div>
   );

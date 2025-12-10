@@ -1,64 +1,73 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import api from "../services/api";
+// src/context/AuthContext.jsx
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import api from "../services/api"; // ✅ axios instance with baseURL = VITE_API_URL
 
 const AuthContext = createContext(undefined);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [user, setUser] = useState(null);        // { id, email, role, scope }
+  const [loading, setLoading] = useState(true);  // for initial load + login
+  const [error, setError] = useState(null);      // auth-level error message
 
-  // ✅ Check if user is already logged in on app load
+  // ✅ Load user from localStorage on first render
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const storedToken = localStorage.getItem("authToken");
+    try {
+      const storedUser = localStorage.getItem("user");
+      const storedToken = localStorage.getItem("authToken");
 
-    if (storedUser && storedToken) {
-      try {
+      if (storedUser && storedToken) {
         setUser(JSON.parse(storedUser));
-      } catch (e) {
-        console.error("Error parsing stored user:", e);
-        localStorage.removeItem("user");
-        localStorage.removeItem("authToken");
       }
+    } catch (e) {
+      console.error("Error parsing stored user:", e);
+      localStorage.removeItem("user");
+      localStorage.removeItem("authToken");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
-  // ✅ Login using backend API (NOT Firebase)
+  // ✅ Login using backend API
   const login = async (email, password) => {
     try {
       setError(null);
       setLoading(true);
 
-      console.log("🔄 Attempting login with:", email); // Debug
+      console.log("🔄 Attempting login with:", email);
 
-      // ✅ Call YOUR backend login endpoint
       const response = await api.post("/api/auth/login", {
         email,
-        password
+        password,
       });
 
-      console.log("✅ Login response:", response.data); // Debug
+      console.log("✅ Login response:", response.data);
 
-      // ✅ Extract token and user from backend response
       const { token, user: backendUser } = response.data;
 
       if (!token || !backendUser) {
         throw new Error("Invalid response from backend");
       }
 
-      // ✅ Store in localStorage
+      // ✅ Persist in localStorage for session restore
       localStorage.setItem("authToken", token);
       localStorage.setItem("user", JSON.stringify(backendUser));
 
-      // ✅ Update state
       setUser(backendUser);
-
       return response.data;
     } catch (err) {
-      console.error("❌ Login error:", err); // Debug
-      const errorMsg = err.response?.data?.error || err.message || "Login failed";
+      console.error("❌ Login error (AuthContext):", err);
+
+      const errorMsg =
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        err.message ||
+        "Login failed";
+
       setError(errorMsg);
       throw new Error(errorMsg);
     } finally {
@@ -66,9 +75,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ✅ Logout
+  // ✅ Logout: clear local storage + tell backend (optional)
   const logout = async () => {
     try {
+      // Optional: tell backend (you already have /api/auth/logout)
       await api.post("/api/auth/logout");
     } catch (err) {
       console.error("Logout error:", err);
@@ -81,12 +91,13 @@ export const AuthProvider = ({ children }) => {
   };
 
   const value = {
-    user,              // Backend user object { id, email, role, scope }
-    role: user?.role,  // User's role from backend
+    user,
+    role: user?.role || null,
     loading,
     error,
     login,
     logout,
+    isAuthenticated: !!user,
   };
 
   return (
