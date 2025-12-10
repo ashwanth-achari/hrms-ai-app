@@ -1,0 +1,8 @@
+venv312
+.vscode
+
+.venv
+node_modules
+dist
+.env
+**/.env

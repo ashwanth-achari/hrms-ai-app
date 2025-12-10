@@ -1,0 +1,46 @@
+/* Role Dropdown Styling */
+.role-dropdown {
+  padding: 0.45rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 0.85rem;
+  background: #ffffff;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.role-dropdown:hover {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.role-dropdown:focus {
+  outline: none;
+  border-color: #1d4ed8;
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.25);
+}
+
+/* Logout Button Styling */
+.logout-btn {
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  border: none;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.logout-btn:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(220, 38, 38, 0.25);
+}
+
+.logout-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}

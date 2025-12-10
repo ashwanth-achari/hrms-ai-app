@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "../../HRMS-App"
+		},
+		{
+			"path": "../../Backend"
+		},
+		{
+			"path": ".."
+		}
+	],
+	"settings": {}
+}
