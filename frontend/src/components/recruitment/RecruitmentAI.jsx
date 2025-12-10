@@ -59,43 +59,64 @@ const RecruitmentAI = () => {
 
   // === MAIN OCR CALL ===
   const handleEvaluateCandidate = async () => {
-    if (!selectedCandidate || !selectedCandidate.resumeFilename) return;
+  if (!selectedCandidate || !selectedCandidate.resumeFilename) return;
 
-    setEvaluating(true);
-    setEvaluationResult(null);
-    setShowRawText(false);
+  setEvaluating(true);
+  setEvaluationResult(null);
+  setShowRawText(false);
 
-    try {
-      const filename = encodeURIComponent(selectedCandidate.resumeFilename);
-      const AI_URL = import.meta.env.VITE_AI_URL;
-      
-      // matches what you tested in the browser:
-      const res = await fetch(`${AI_URL}/ocr/extract?filename=${filename}`, {
-        method: "GET",
-      });
+  try {
+    const filename = encodeURIComponent(selectedCandidate.resumeFilename);
 
-      if (!res.ok) {
-        let msg = `OCR API error (${res.status})`;
+    const AI_URL = import.meta.env.VITE_AI_URL || "http://127.0.0.1:8000";
+
+    const fullUrl = `${AI_URL}/ocr/extract?filename=${filename}`;
+    console.log("🔗 Calling AI URL:", fullUrl);
+
+    const res = await fetch(fullUrl);
+    const contentType = res.headers.get("content-type") || "";
+
+    // Read body as text so we can see what it actually is
+    const rawText = await res.text();
+    console.log("📥 Raw OCR response (first 200 chars):", rawText.slice(0, 200));
+
+    if (!res.ok) {
+      // If server sent JSON error, try to parse it
+      if (contentType.includes("application/json")) {
         try {
-          const errData = await res.json();
-          if (errData?.detail) msg = errData.detail;
-        } catch (_) {}
-        throw new Error(msg);
+          const errJson = JSON.parse(rawText);
+          const msg = errJson.detail || errJson.error || JSON.stringify(errJson);
+          throw new Error(msg);
+        } catch {
+          // fall through
+        }
       }
 
-      const data = await res.json();
-      setEvaluationResult(data);
-    } catch (err) {
-      console.error("OCR API error:", err);
-      setEvaluationResult({
-        error:
-          err.message ||
-          "Failed to evaluate resume. Please check that the OCR service is running.",
-      });
-    } finally {
-      setEvaluating(false);
+      throw new Error(
+        `OCR API error (${res.status}). Body starts with: ${rawText.slice(0, 80)}`
+      );
     }
-  };
+
+    if (!contentType.includes("application/json")) {
+      throw new Error(
+        "OCR service did not return JSON. Check VITE_AI_URL and the AI server route."
+      );
+    }
+
+    const data = JSON.parse(rawText);
+    console.log("✅ Parsed OCR data:", data);
+    setEvaluationResult(data);
+  } catch (err) {
+    console.error("OCR API error:", err);
+    setEvaluationResult({
+      error: err.message || "Failed to evaluate resume. Please check OCR service.",
+    });
+  } finally {
+    setEvaluating(false);
+  }
+};
+console.log("VITE_AI_URL:", import.meta.env.VITE_AI_URL);
+
 
   const renderResumeScreening = () => (
     <div style={{ display: "flex", gap: "1rem" }}>
