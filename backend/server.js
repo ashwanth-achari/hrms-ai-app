@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 
+
 const app = express();
 
 // ✅ CORS (frontend URL from env, fallback to localhost for dev)
