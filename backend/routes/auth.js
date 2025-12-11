@@ -7,61 +7,60 @@ const User = require("../models/user");
 const router = express.Router();
 
 /**
- * POST /api/auth/create-test-users
  * Create test users if they don't already exist
  */
-router.post("/create-test-users", async (req, res) => {
-  try {
-    const existingUser = await User.findOne({ email: "admin@company.com" });
-    if (existingUser) {
-      return res.json({ message: "Test users already exist" });
-    }
+// router.post("/create-test-users", async (req, res) => {
+//   try {
+//     const existingUser = await User.findOne({ email: "admin@company.com" });
+//     if (existingUser) {
+//       return res.json({ message: "Test users already exist" });
+//     }
 
-    const hashedPassword = await bcrypt.hash("password123", 10);
+//     const hashedPassword = await bcrypt.hash("password123", 10);
 
-    const testUsers = [
-      {
-        email: "admin@company.com",
-        password: hashedPassword,
-        role: "MANAGEMENT_ADMIN",
-        scope: { department: "Admin", team: "HQ" },
-      },
-      {
-        email: "manager@company.com",
-        password: hashedPassword,
-        role: "SENIOR_MANAGER",
-        scope: { department: "Engineering", team: "Backend" },
-      },
-      {
-        email: "recruiter@company.com",
-        password: hashedPassword,
-        role: "HR_RECRUITER",
-        scope: { department: "HR", team: "Recruitment" },
-      },
-      {
-        email: "employee@company.com",
-        password: hashedPassword,
-        role: "EMPLOYEE",
-        scope: { department: "Engineering", team: "Backend" },
-      },
-    ];
+//     const testUsers = [
+//       {
+//         email: "admin@company.com",
+//         password: hashedPassword,
+//         role: "MANAGEMENT_ADMIN",
+//         scope: { department: "Admin", team: "HQ" },
+//       },
+//       {
+//         email: "manager@company.com",
+//         password: hashedPassword,
+//         role: "SENIOR_MANAGER",
+//         scope: { department: "Engineering", team: "Backend" },
+//       },
+//       {
+//         email: "recruiter@company.com",
+//         password: hashedPassword,
+//         role: "HR_RECRUITER",
+//         scope: { department: "HR", team: "Recruitment" },
+//       },
+//       {
+//         email: "employee@company.com",
+//         password: hashedPassword,
+//         role: "EMPLOYEE",
+//         scope: { department: "Engineering", team: "Backend" },
+//       },
+//     ];
 
-    await User.insertMany(testUsers);
+//     await User.insertMany(testUsers);
 
-    res.json({
-      message: "✅ Test users created successfully",
-      testCredentials: [
-        { email: "admin@company.com", password: "password123", role: "MANAGEMENT_ADMIN" },
-        { email: "manager@company.com", password: "password123", role: "SENIOR_MANAGER" },
-        { email: "recruiter@company.com", password: "password123", role: "HR_RECRUITER" },
-        { email: "employee@company.com", password: "password123", role: "EMPLOYEE" },
-      ],
-    });
-  } catch (error) {
-    console.error("❌ Error creating test users:", error);
-    res.status(500).json({ error: error.message || "Internal server error" });
-  }
-});
+//     res.json({
+//       message: "✅ Test users created successfully",
+//       testCredentials: [
+//         { email: "admin@company.com", password: "password123", role: "MANAGEMENT_ADMIN" },
+//         { email: "manager@company.com", password: "password123", role: "SENIOR_MANAGER" },
+//         { email: "recruiter@company.com", password: "password123", role: "HR_RECRUITER" },
+//         { email: "employee@company.com", password: "password123", role: "EMPLOYEE" },
+//       ],
+//     });
+//   } catch (error) {
+//     console.error("❌ Error creating test users:", error);
+//     res.status(500).json({ error: error.message || "Internal server error" });
+//   }
+// });
 
 /**
  * POST /api/auth/login
